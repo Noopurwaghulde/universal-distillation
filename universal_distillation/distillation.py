@@ -34,7 +34,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
     PretrainedConfig,
 )
-from pytorch_lightning.plugins import DDPPlugin
+#from pytorch_lightning.plugins import DDPPlugin
+from pytorch_lightning.strategies import DDPStrategy
 
 # logging.config.dictConfig(config)
 logging.basicConfig(
@@ -73,7 +74,14 @@ def cli_main():
     parser.add_argument("--teacher", type=str, required=True)
     parser.add_argument("--save_dir", type=str, required=True)
     parser.add_argument("--load_counts", type=str, required=False)
-    parser = pl.Trainer.add_argparse_args(parser)
+    #parser = pl.Trainer.add_argparse_args(parser)
+
+    # Trainer arguments
+    parser.add_argument("--max_epochs", type=int, default=3)
+    parser.add_argument("--accelerator", type=str, default="gpu")  # or "cpu" if needed
+    parser.add_argument("--devices", type=int, default=1)
+    parser.add_argument("--strategy", type=str, default="ddp")  # optional: only if using DDP
+
     parser = BaseTransformer.add_model_specific_args(parser)
     args = parser.parse_args()
 
@@ -87,10 +95,10 @@ def cli_main():
         tokenizer=tokenizer,
     )
 
-    #constraints = [[2016, 2002]]  # she  # he
+    constraints = [[2016, 2002]]  # she  # he
 
-    #model = BaseTransformer(args.teacher, constraints=constraints, **vars(args))
-    model = BaseTransformer(args.teacher, **vars(args))
+    model = BaseTransformer(args.teacher, constraints=constraints, **vars(args))
+    #model = BaseTransformer(args.teacher, **vars(args))
 
     # ------------
     # training
@@ -100,17 +108,20 @@ def cli_main():
     tokenizer.save_pretrained(args.save_dir)
 
 
-    trainer = pl.Trainer.from_argparse_args(
+    #trainer = pl.Trainer.from_argparse_args(
+    trainer = pl.Trainer(
         args,
         logger=tb_logger,
         accelerator="ddp",
-        plugins=[DDPPlugin(find_unused_parameters=False)],
+        # plugins=[DDPPlugin(find_unused_parameters=False)],
+        strategy=DDPStrategy(find_unused_parameters=False)
         # profiler="simple",
         callbacks=[
             EarlyStopping(monitor="PPPL"),
             #CommitCallback(args.save_dir, lambda model=model : model.student.save_pretrained(args.save_dir))
             ],
-        checkpoint_callback=False
+        #checkpoint_callback=False
+        enable_checkpointing=False
     )
     trainer.fit(model, data_module)
 
