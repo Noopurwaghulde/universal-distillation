@@ -19,7 +19,6 @@ import yaml
 from os import cpu_count
 from typing import Optional, List
 from transformers import (
-    AdamW,
     AutoModelForMaskedLM,
     AutoConfig,
     AutoTokenizer,
@@ -27,6 +26,7 @@ from transformers import (
     PretrainedConfig,
 )
 
+from transformers.optimization import AdamW
 
 class LRPolicy:
     """
