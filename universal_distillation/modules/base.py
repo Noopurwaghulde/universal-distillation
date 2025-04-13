@@ -13,6 +13,7 @@ from torch.utils.data import (
 )
 import torch.nn as nn
 from torch.optim.lr_scheduler import LambdaLR
+from torch.optim import AdamW
 import logging
 import logging.config
 import yaml
@@ -26,7 +27,6 @@ from transformers import (
     PretrainedConfig,
 )
 
-from transformers.optimization import AdamW
 
 class LRPolicy:
     """
