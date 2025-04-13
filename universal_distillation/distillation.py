@@ -26,8 +26,8 @@ import os
 from universal_distillation.modules.base import BaseTransformer
 from universal_distillation.data.jit import JITDataModule
 
+from torch.optim import AdamW
 from transformers import (
-    AdamW,
     AutoModelForMaskedLM,
     AutoConfig,
     AutoTokenizer,
