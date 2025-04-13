@@ -114,7 +114,7 @@ def cli_main():
         logger=tb_logger,
         accelerator="ddp",
         # plugins=[DDPPlugin(find_unused_parameters=False)],
-        strategy=DDPStrategy(find_unused_parameters=False)
+        strategy=DDPStrategy(find_unused_parameters=False),
         # profiler="simple",
         callbacks=[
             EarlyStopping(monitor="PPPL"),
